@@ -36,6 +36,8 @@ Route::get('/reversevalidated', [Controller::class, 'reversevalidated'])->middle
 // Route::get('/serverdashboard', function () {
 //     return view('server.dashboard');
 // });
+Route::get('/maps', [ServerController::class, 'maps']);
+
 Route::get('/serverdashboard', [ServerController::class, 'index']);
 Route::get('/serverforwardgeocode', [ServerController::class, 'forwardindex']);
 Route::POST('/serverforwardvalidate', [ServerController::class, 'forwardvalidate']);
@@ -47,6 +49,7 @@ Route::get('/serverreversevalidated', [ServerController::class, 'reversevalidate
 Route::get('/database', [ServerController::class, 'index']);
 Route::get('/disconnect', [ServerController::class, 'disconnect']);
 Route::POST('/testconnection', [ServerController::class, 'testconnection']);
+Route::POST('/winconnection', [ServerController::class, 'winconnection']);
 Route::POST('/forwardquery', [ServerController::class, 'forwardquery']);
 Route::POST('/reversequery', [ServerController::class, 'reversequery']);
 

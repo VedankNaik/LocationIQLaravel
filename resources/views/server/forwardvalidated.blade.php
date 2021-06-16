@@ -132,9 +132,9 @@
                 @if(count($addresses)!=0)
                 <form method="POST" action="{{ url('/serverforwardvalidate')}}" enctype="multipart/form-data">
                     @csrf
-                    <div class="">
+                    <div class="overflow-scroll h-4/5 mt-2">
                         <table class="w-full">
-                            <thead class="bg-blue-400">
+                            <thead class="sticky top-0 bg-blue-400">
                                 <tr class="border border-4 border-blue-500">
                                     @if(count($columns)!=0)
                                     @foreach ($columns as $column)
@@ -161,7 +161,7 @@
                         <div> {{ $addresses->links() }}</div>
                     </div>
                     <div class="p-6 bg-white border-b border-gray-200">
-                        <a href="{{ url('/serverreversegeocode') }}"
+                        <a href="{{ url('/serverforwardgeocode') }}"
                             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Back</a>
                     </div>
                     <div class="p-6 bg-white border-b border-gray-200">

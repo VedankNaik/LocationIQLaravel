@@ -194,21 +194,21 @@
                         @if($request)
                         <input
                             class="w-full h-10 px-3 text-base placeholder-gray-600 border rounded-lg focus:shadow-outline"
-                            placeholder="Query" type="text" name="query" id="query"
+                            type="text" name="query" id="query"
                             value="{{ $request->input('query') }}" required readonly />
                         <input
                             class="w-1/4 h-10 px-3 text-base placeholder-gray-600 border rounded-lg focus:shadow-outline mt-4"
-                            placeholder="Select table name" type="text" name="selecttable" id="selecttable"
+                            type="text" name="selecttable" id="selecttable"
                             value="{{ $request->input('selecttable') }}" required readonly />
                         <input
                             class="w-1/4 h-10 px-3 text-base placeholder-gray-600 border rounded-lg focus:shadow-outline mt-4"
-                            placeholder="Insert table name" type="text" name="inserttable" id="inserttable"
+                            type="text" name="inserttable" id="inserttable"
                             value="{{ $request->input('inserttable') }}" required readonly />
                         @endif
                     </div>
-                    <div class="mt-2">
+                    <div class="overflow-scroll h-96 mt-2">
                         <table class="w-full">
-                            <thead class="bg-blue-400">
+                            <thead class="sticky top-0 bg-blue-400">
                                 <tr class="border border-4 border-blue-500">
                                     @if(count($columns)!=0)
                                     @foreach ($columns as $column)

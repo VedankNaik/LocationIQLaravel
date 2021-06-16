@@ -132,9 +132,9 @@
                 @if(count($coordinates)!=0)
                 <form method="POST" action="{{ url('/serverreversevalidate')}}" enctype="multipart/form-data">
                     @csrf
-                    <div class="">
+                    <div class="overflow-scroll h-4/5 mt-2">
                         <table class="w-full">
-                            <thead class="bg-blue-400">
+                            <thead class="sticky top-0 bg-blue-400">
                                 <tr class="border border-4 border-blue-500">
                                     @if(count($columns)!=0)
                                     @foreach ($columns as $column)

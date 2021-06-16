@@ -39,6 +39,11 @@ class ServerController extends BaseController
         }
     }
 
+    public function maps()
+    {
+        return view('server.maps');
+    }
+
     public function disconnect()
     {
         Session::forget('sqlsrv');
@@ -86,6 +91,14 @@ class ServerController extends BaseController
             if (Session::has('sqlsrv')) {
                 Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
                 DB::reconnect();
+                if (!Schema::hasTable($request->input('selecttable'))) 
+                {
+                    return redirect()->back()->withInput($request->all())->with('Error', 'Cannot find table '. $request->input('selecttable'));
+                }
+                if ($request->input('inserttable') != null && !Schema::hasTable($request->input('inserttable'))) 
+                {
+                    return redirect()->back()->withInput($request->all())->with('Error', 'Cannot find table '. $request->input('inserttable'));
+                }
                 $addresses = DB::select($request->input('query'));
                 $columns = Schema::getColumnListing($request->input('selecttable'));
                 return view('server.forwardgeocode', compact('addresses', 'columns', 'request'));
@@ -103,6 +116,14 @@ class ServerController extends BaseController
             if (Session::has('sqlsrv')) {
                 Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
                 DB::reconnect();
+                if (!Schema::hasTable($request->input('selecttable'))) 
+                {
+                    return redirect()->back()->withInput($request->all())->with('Error', 'Cannot find table '. $request->input('selecttable'));
+                }
+                if ($request->input('inserttable') != null && !Schema::hasTable($request->input('inserttable'))) 
+                {
+                    return redirect()->back()->withInput($request->all())->with('Error', 'Cannot find table '. $request->input('inserttable'));
+                }
                 $coordinates = DB::select($request->input('query'));
                 $columns = Schema::getColumnListing($request->input('selecttable'));
                 return view('server.reversegeocode', compact('coordinates', 'columns', 'request'));
@@ -138,7 +159,15 @@ class ServerController extends BaseController
                 case 'validate':
                 if (Session::has('sqlsrv')) {
                     Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
-                    DB::reconnect();
+                    DB::reconnect();                    
+                    if (!Schema::hasTable($request->input('selecttable'))) 
+                    {
+                        return redirect()->back()->withInput($request->all())->with('Error', 'Cannot find table '. $request->input('selecttable'));
+                    }
+                    if (!Schema::hasTable($request->input('inserttable'))) 
+                    {
+                        return redirect()->back()->withInput($request->all())->with('Error', 'Cannot find table '. $request->input('inserttable'));
+                    }
                     $addresses = DB::select($request->input('query'));
                     $addresses = array_slice($addresses, 0, 2);
                     $columns = Schema::getColumnListing($request->input('selecttable'));
@@ -206,6 +235,10 @@ class ServerController extends BaseController
             if (Session::has('sqlsrv')) {
                 Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
                 DB::reconnect();
+                if (!Schema::hasTable($request->input('inserttable'))) 
+                {
+                    return redirect()->back()->withInput($request->all())->with('Error', 'Cannot find table '. $request->input('inserttable'));
+                }
                 $addresses = DB::table($request->input('inserttable'))->paginate(15);
                 $columns = Schema::getColumnListing($request->input('inserttable'));
                 // dd($columns);
@@ -244,6 +277,14 @@ class ServerController extends BaseController
                 if (Session::has('sqlsrv')) {
                     Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
                     DB::reconnect();
+                    if (!Schema::hasTable($request->input('selecttable'))) 
+                    {
+                        return redirect()->back()->withInput($request->all())->with('Error', 'Cannot find table '. $request->input('selecttable'));
+                    }
+                    if (!Schema::hasTable($request->input('inserttable'))) 
+                    {
+                        return redirect()->back()->withInput($request->all())->with('Error', 'Cannot find table '. $request->input('inserttable'));
+                    }
                     $coordinates = DB::select($request->input('query'));
                     $coordinates = array_slice($coordinates, 0, 2);
                     $columns = Schema::getColumnListing($request->input('selecttable'));
@@ -312,6 +353,10 @@ class ServerController extends BaseController
             if (Session::has('sqlsrv')) {
                 Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
                 DB::reconnect();
+                if (!Schema::hasTable($request->input('inserttable'))) 
+                {
+                    return redirect()->back()->withInput($request->all())->with('Error', 'Cannot find table '. $request->input('inserttable'));
+                }
                 $coordinates = DB::table($request->input('inserttable'))->paginate(15);
                 $columns = Schema::getColumnListing($request->input('inserttable'));
                 // dd($columns);
