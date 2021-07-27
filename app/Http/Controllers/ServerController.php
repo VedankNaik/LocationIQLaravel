@@ -12,10 +12,14 @@ use Illuminate\Support\Facades\Http;
 use Config;
 use Session;
 use Schema;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use \DB;
 use App\Models\Validation;
 use App\Models\LatLonValidation;
 use Barryvdh\Debugbar\Facade as Debugbar;
+use Illuminate\Support\Facades\Crypt;
 
 class ServerController extends BaseController
 {
@@ -24,15 +28,32 @@ class ServerController extends BaseController
     public $db;
     public $config;
 
-    public function index()
+    public function forwardDashboard(Request $request)
     {
         if (Session::has('sqlsrv')) {
-            $result = collect([]);
-            $request = "";
-            Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+            $addresses = collect([]);
+            // $request = "";
+            // Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+            Config::set('database.connections.sqlsrv',unserialize(Crypt::decryptString(Session::get('sqlsrv'))));
             DB::reconnect();
             // dd(DB::connection('sqlsrv')->getPdo());
-            return view('server.dashboard');
+            return view('server.forwardDashboard', compact('addresses', 'request'));
+        // return view('operations', compact('result'));
+        } else {
+            return view('server.connectionform');
+        }
+    }
+
+    public function reverseDashboard(Request $request)
+    {
+        if (Session::has('sqlsrv')) {
+            $coordinates = collect([]);
+            // $request = "";
+            // Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+            Config::set('database.connections.sqlsrv',unserialize(Crypt::decryptString(Session::get('sqlsrv'))));
+            DB::reconnect();
+            // dd(DB::connection('sqlsrv')->getPdo());
+            return view('server.reverseDashboard', compact('coordinates', 'request'));
         // return view('operations', compact('result'));
         } else {
             return view('server.connectionform');
@@ -73,14 +94,15 @@ class ServerController extends BaseController
             DB::reconnect();
             DB::connection()->getPdo();
             if (DB::connection('sqlsrv')->getPdo()) {
-                Session::put('sqlsrv', Config::get('database.connections.sqlsrv'));
+                // Session::put('sqlsrv', Config::get('database.connections.sqlsrv'));
+                Session::put('sqlsrv', Crypt::encryptString(serialize(Config::get('database.connections.sqlsrv'))));
                 Session::put('db', $request->database);
-                // dd(DB::connection()->getDatabaseName());
                 return redirect()->back()->withInput($request->all())->with('Success', 'Connection successful');
             } else {
                 return redirect()->back()->withInput($request->all())->with('Error', 'Connection unsuccessful');
             }
         } catch (\Exception $e) {
+            // dd($e);
             return redirect()->back()->withInput($request->all())->with('Error', $e->getMessage());
         }
     }
@@ -89,7 +111,8 @@ class ServerController extends BaseController
     {
         try {
             if (Session::has('sqlsrv')) {
-                Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+                // Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+                Config::set('database.connections.sqlsrv',unserialize(Crypt::decryptString(Session::get('sqlsrv'))));
                 DB::reconnect();
                 if (!Schema::hasTable($request->input('selecttable'))) 
                 {
@@ -100,8 +123,12 @@ class ServerController extends BaseController
                     return redirect()->back()->withInput($request->all())->with('Error', 'Cannot find table '. $request->input('inserttable'));
                 }
                 $addresses = DB::select($request->input('query'));
-                $columns = Schema::getColumnListing($request->input('selecttable'));
-                return view('server.forwardgeocode', compact('addresses', 'columns', 'request'));
+                // $addresses = $this->paginateArray($addressesArray);
+                // dd($addresses);
+                $columns = Schema::getColumnListing($request->input('selecttable'));             
+                // return view('server.forwardgeocode', compact('addresses', 'columns', 'request'));
+                return view('server.forwardDashboard', compact('addresses', 'columns', 'request'));
+            
             } else {
                 return redirect()->back()->with('Error', 'Session expired');
             }
@@ -110,11 +137,23 @@ class ServerController extends BaseController
         }
     }
 
+    public function paginateArray($data, $perPage = 15)
+    {
+        $page = Paginator::resolveCurrentPage();
+        $total = count($data);
+        $results = array_slice($data, ($page - 1) * $perPage, $perPage);
+        // dd(Paginator::resolveCurrentPath());
+        return new LengthAwarePaginator($results, $total, $perPage, $page, [
+            'path' => Paginator::resolveCurrentPath(),
+        ]);
+    }
+
     public function reversequery(Request $request)
     {
         try {
             if (Session::has('sqlsrv')) {
-                Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+                // Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+                Config::set('database.connections.sqlsrv',unserialize(Crypt::decryptString(Session::get('sqlsrv'))));
                 DB::reconnect();
                 if (!Schema::hasTable($request->input('selecttable'))) 
                 {
@@ -126,7 +165,7 @@ class ServerController extends BaseController
                 }
                 $coordinates = DB::select($request->input('query'));
                 $columns = Schema::getColumnListing($request->input('selecttable'));
-                return view('server.reversegeocode', compact('coordinates', 'columns', 'request'));
+                return view('server.reverseDashboard', compact('coordinates', 'columns', 'request'));
             } else {
                 return redirect()->back()->with('Error', 'Session expired');
             }
@@ -139,7 +178,8 @@ class ServerController extends BaseController
     {
         try {
             if (Session::has('sqlsrv')) {
-                Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+                // Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+                Config::set('database.connections.sqlsrv',unserialize(Crypt::decryptString(Session::get('sqlsrv'))));
                 DB::reconnect();
                 $addresses = collect([]);
                 return view('server.forwardgeocode', compact('addresses'));
@@ -158,7 +198,8 @@ class ServerController extends BaseController
             switch ($request->input('action')) {
                 case 'validate':
                 if (Session::has('sqlsrv')) {
-                    Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+                    // Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+                    Config::set('database.connections.sqlsrv',unserialize(Crypt::decryptString(Session::get('sqlsrv'))));
                     DB::reconnect();                    
                     if (!Schema::hasTable($request->input('selecttable'))) 
                     {
@@ -188,7 +229,6 @@ class ServerController extends BaseController
                                 sleep(1);
                 
                                 $res = $response['searchResponseLists'][0];
-
                                 $insert = DB::table($request->input('inserttable'))->insert([
                             'EGID' => $address->EGID,
                             'Street' => $address->Street,
@@ -211,17 +251,20 @@ class ServerController extends BaseController
                         }
                     }
 
-                    $addresses = DB::table($request->input('inserttable'))->paginate(15);
-                    $columns = Schema::getColumnListing($request->input('inserttable'));
-                    return view('server.forwardvalidated', compact('addresses', 'columns'));
+                    // $addresses = DB::table($request->input('inserttable'))->paginate(15);
+                    // $columns = Schema::getColumnListing($request->input('inserttable'));
+                    // return view('server.forwardvalidated', compact('addresses', 'columns'));
+                    $addresses = DB::select($request->input('query'));
+                    $columns = Schema::getColumnListing($request->input('selecttable'));             
+                    return view('server.forwardDashboard', compact('addresses', 'columns', 'request'))->with('Success', 'Records validated');
                 // Debugbar::info($res);
                 } else {
                     return view('server.connectionform');
                 }
                 break;
                 
-                case 'validated':
-                    return $this->forwardvalidated($request);
+                case 'fetch':
+                    return $this->forwardquery($request);
                 break;
             }
         } catch (\Exception $e) {
@@ -233,7 +276,8 @@ class ServerController extends BaseController
     {
         try {
             if (Session::has('sqlsrv')) {
-                Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+                // Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+                Config::set('database.connections.sqlsrv',unserialize(Crypt::decryptString(Session::get('sqlsrv'))));
                 DB::reconnect();
                 if (!Schema::hasTable($request->input('inserttable'))) 
                 {
@@ -255,7 +299,8 @@ class ServerController extends BaseController
     {
         try {
             if (Session::has('sqlsrv')) {
-                Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+                // Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+                Config::set('database.connections.sqlsrv',unserialize(Crypt::decryptString(Session::get('sqlsrv'))));
                 DB::reconnect();
                 $coordinates = collect([]);
                 return view('server.reversegeocode', compact('coordinates'));
@@ -275,7 +320,8 @@ class ServerController extends BaseController
                 case 'validate':
                     
                 if (Session::has('sqlsrv')) {
-                    Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+                    // Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+                    Config::set('database.connections.sqlsrv',unserialize(Crypt::decryptString(Session::get('sqlsrv'))));
                     DB::reconnect();
                     if (!Schema::hasTable($request->input('selecttable'))) 
                     {
@@ -308,6 +354,7 @@ class ServerController extends BaseController
                                 sleep(1);
                 
                                 $res = $response['searchResponse'];
+                                // dd($res);
                                 $insert = DB::table($request->input('inserttable'))->insert([
                                     'RefID' =>  $coordinate->ID,
                                     'City' => $coordinate->city,
@@ -317,7 +364,7 @@ class ServerController extends BaseController
                                     'NewLatitude' => $res['Latitude'],
                                     'NewLongitude' => $res['Longitude'],
                                     'DisplayName' => $res['DisplayName'],
-                                    'Importance' => $res['importance'],
+                                    // 'Importance' => $res['importance'],
                 
                                 ]);
                 
@@ -328,17 +375,21 @@ class ServerController extends BaseController
                         }
                     }
 
-                    $coordinates = DB::table($request->input('inserttable'))->paginate(15);
-                    $columns = Schema::getColumnListing($request->input('inserttable'));
-                    return view('server.reversevalidated', compact('coordinates', 'columns'));
+                    // $coordinates = DB::table($request->input('inserttable'))->paginate(15);
+                    // $columns = Schema::getColumnListing($request->input('inserttable'));
+                    // return view('server.reversevalidated', compact('coordinates', 'columns'));
+                    $coordinates = DB::select($request->input('query'));
+                    $columns = Schema::getColumnListing($request->input('selecttable'));             
+                    return view('server.reverseDashboard', compact('coordinates', 'columns', 'request'))->with('Success', 'Records validated');
+                
                 // Debugbar::info($res);
                 } else {
                     return view('server.connectionform');
                 }
                 break;
                 
-                case 'validated':
-                    return $this->reversevalidated($request);
+                case 'fetch':
+                    return $this->reversequery($request);
                 break;
             }
         } catch (\Exception $e) {
@@ -351,7 +402,8 @@ class ServerController extends BaseController
     {
         try {
             if (Session::has('sqlsrv')) {
-                Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+                // Config::set('database.connections.sqlsrv', Session::get('sqlsrv'));
+                Config::set('database.connections.sqlsrv',unserialize(Crypt::decryptString(Session::get('sqlsrv'))));
                 DB::reconnect();
                 if (!Schema::hasTable($request->input('inserttable'))) 
                 {

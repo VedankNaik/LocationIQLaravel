@@ -27,8 +27,8 @@
                     @auth
                         <a href="{{ url('/dashboard') }}" class="text-lg text-gray-200">Dashboard</a>
                     @else
-                        <a href="{{ url('/database') }}" class="text-lg text-gray-200">Database</a>
-                        <a href="{{ url('/maps') }}" class="text-lg text-gray-200">Maps</a>
+                        <a href="{{ url('/database') }}" class="ml-4 text-lg text-gray-200">Database</a>
+                        <a href="{{ url('/maps') }}" class="ml-4 text-lg text-gray-200">Maps</a>
                         <a href="{{ route('login') }}" class="ml-4 text-lg text-gray-200">Log in</a>                       
                         @if (Route::has('register'))
                             <a href="{{ route('register') }}" class="ml-4 text-lg text-gray-200">Register</a>

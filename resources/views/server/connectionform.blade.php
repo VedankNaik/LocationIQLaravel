@@ -17,7 +17,7 @@
     <script src="{{ asset('js/app.js') }}" defer></script>
 </head>
 
-<div class="mt-6 ml-6">
+<!-- <div class="mt-6 ml-6">
     <form method="POST" action="{{ url('/testconnection')}}" class="space-y-4 text-gray-700">
         @csrf
         <div class="flex flex-wrap -mx-2 space-y-4 md:space-y-0">
@@ -68,6 +68,63 @@
             </div>
         </div>
     </form>
-</div>
+</div> -->
+
+
+<body class="bg-blue-200">
+    <div class="container w-full max-w-xs mx-auto mt-8 px-1 font-sans">
+        <form method="POST" action="{{ url('/testconnection')}}"
+            class="bg-white shadow-md rounded-lg px-8 pt-6 pb-8 mb-4">
+            @csrf
+            <h3 class="title text-xl mb-8 mx-auto text-center font-bold text-blue-700">Connect to Server</h3>
+            <div class="mb-4 grid gap-6">
+                <div>
+                    <label for="host" class="block text-gray-500 font-medium text-sm mb-2">Server</label>
+                    <input name="host" type="text" placeholder=""
+                        class="appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500" />
+                </div>
+                <div>
+                    <label for="database" class="block text-gray-500 font-medium text-sm mb-2">Database</label>
+                    <input name="database" type="text" placeholder=""
+                        class="appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500" />
+                </div>
+                <div>
+                    <label for="username" class="block text-gray-500 font-medium text-sm mb-2">User Name</label>
+                    <input name="username" type="text" placeholder=""
+                        class="appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500" />
+                </div>
+                <div>
+                    <label for="password" class="block text-gray-500 font-medium text-sm mb-2">Password</label>
+                    <input name="password" type="password" placeholder=""
+                        class="appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500" />
+                </div>
+                <div class="flex items-center justify-between">
+                    <button
+                        class="shadow bg-blue-500 hover:bg-blue-600 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded mt-4"
+                        type="submit">
+                        Connect
+                    </button>
+                </div>
+                <div>
+                    @if($errors->any())
+                    @foreach($errors->all() as $error)
+                    <div class="w-auto bg-red-100 border border-red-400 text-red-700 px-4 py-3 round">{{$error}}</div>
+                    @endforeach
+                    @endif
+                    @if (session('Success'))
+                    <div class="">
+                        {{ session('Success') }}
+                    </div>
+                    @endif
+                    @if (session('Error'))
+                    <div class="w-auto bg-red-100 border border-red-400 text-red-700 px-4 py-3 round">
+                        {{ session('Error') }}
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
 
 </html>

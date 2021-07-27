@@ -46,11 +46,19 @@ Route::get('/serverreversegeocode', [ServerController::class, 'reverseindex']);
 Route::POST('/serverreversevalidate', [ServerController::class, 'reversevalidate']);
 Route::get('/serverreversevalidated', [ServerController::class, 'reversevalidated']);
 
-Route::get('/database', [ServerController::class, 'index']);
+Route::get('/database', [ServerController::class, 'forwardDashboard']);
+Route::get('/forwarddashboard', [ServerController::class, 'forwardDashboard']);
+Route::get('/reversedashboard', [ServerController::class, 'reverseDashboard']);
 Route::get('/disconnect', [ServerController::class, 'disconnect']);
 Route::POST('/testconnection', [ServerController::class, 'testconnection']);
 Route::POST('/winconnection', [ServerController::class, 'winconnection']);
 Route::POST('/forwardquery', [ServerController::class, 'forwardquery']);
 Route::POST('/reversequery', [ServerController::class, 'reversequery']);
+
+Route::get('server.forwardDashboard', 'ServerController@forwardquery');
+// Route::POST('forwardquery', 'TransController@index');
+Route::match(['get', 'post'], 'forwardquery',[
+    'as' => 'results_path',
+    'uses' => 'App\Http\Controllers\ServerController@forwardquery' ]);
 
 require __DIR__.'/auth.php';
